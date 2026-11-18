@@ -10,7 +10,7 @@
 #
 # 1. Reconstruye el modelo dentro de un único `Pipeline`, para que la imputación y el escalado
 #    se ajusten **solo con entrenamiento** y viajen junto al modelo al despliegue.
-# 2. Vuelve a comparar candidatos (incluido **Naive Bayes**) con validación cruzada, sin mirar el test.
+# 2. Mide su desempeño con validación cruzada sobre entrenamiento, sin mirar el test.
 # 3. Evalúa el modelo final: discriminación, calibración, estratos de riesgo, utilidad clínica y
 #    comparación contra SOFA en la misma cohorte.
 # 4. Exporta el artefacto (`models/modelo_sepsis.joblib`) y las métricas (`models/metricas.json`).
@@ -19,7 +19,7 @@
 # 1. Configuración y carga de datos
 # 2. Variables y partición (idénticas a la entrega 2)
 # 3. Pipeline de preprocesamiento sin fuga de datos
-# 4. Comparación de candidatos
+# 4. Validación cruzada del modelo propuesto
 # 5. Modelo final: ajuste, coeficientes y calibración
 # 6. Umbrales y estratos de riesgo
 # 7. Resultados en el conjunto de prueba
@@ -40,14 +40,12 @@ import numpy as np
 import pandas as pd
 import sklearn
 from sklearn.compose import ColumnTransformer
-from sklearn.ensemble import HistGradientBoostingClassifier, RandomForestClassifier
 from sklearn.impute import KNNImputer, SimpleImputer
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import (average_precision_score, brier_score_loss, confusion_matrix,
                              precision_recall_curve, roc_auc_score, roc_curve)
 from sklearn.model_selection import (RepeatedStratifiedKFold, StratifiedKFold, cross_val_predict,
                                      cross_val_score, train_test_split)
-from sklearn.naive_bayes import GaussianNB
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import OneHotEncoder, StandardScaler
 
@@ -107,7 +105,7 @@ def guardar(nombre):
 # Se conserva la decisión de negocio de la entrega 2: **ventana 0 h**. El modelo solo usa lo que el
 # intensivista ya conoce al ingreso a UCI, porque el valor clínico está en anticipar (la sepsis es
 # tiempo-dependiente) y porque una variable de 24 h no existe en el momento en que se consulta la herramienta.
-# En la sección 4 se verifica que agregar las demás variables no mejora la discriminación.
+# Esta decisión se tomó y se justificó en la entrega 2; aquí no se vuelve a evaluar.
 
 # %%
 OBJETIVO = "MortalityInICU"
@@ -164,13 +162,6 @@ def preprocesador_knn(k=20):
     return ColumnTransformer([("num", numericas, COLS_NUM), ("cat", categoricas, COLS_CAT)],
                              verbose_feature_names_out=False)
 
-def preprocesador_mediana():
-    numericas = Pipeline([("imputar", SimpleImputer(strategy="median")), ("escalar", StandardScaler())])
-    categoricas = Pipeline([("imputar", SimpleImputer(strategy="most_frequent")),
-                            ("onehot", OneHotEncoder(drop="first", sparse_output=False, handle_unknown="ignore"))])
-    return ColumnTransformer([("num", numericas, COLS_NUM), ("cat", categoricas, COLS_CAT)],
-                             verbose_feature_names_out=False)
-
 def logistica_l1():
     """Regresión logística de la entrega 2: L1, C=0.1, clases balanceadas, solver liblinear.
     scikit-learn >= 1.8 reemplazó `penalty` por `l1_ratio`; se soportan ambas versiones."""
@@ -179,82 +170,32 @@ def logistica_l1():
     return LogisticRegression(l1_ratio=1, **comunes) if version >= (1, 8) else LogisticRegression(penalty="l1", **comunes)
 
 # %% [markdown]
-# ## 4. Comparación de candidatos
+# ## 4. Validación cruzada del modelo propuesto
 #
-# Todos los candidatos se comparan con **validación cruzada estratificada repetida (5×3) sobre
-# entrenamiento**. El conjunto de prueba no interviene en la elección (en la entrega 2 la comparación se
-# hizo con el test; aquí se corrige). Se incluye **Naive Bayes gaussiano**, que asume que las variables
-# son independientes entre sí dado el desenlace y que cada una sigue una normal dentro de cada clase.
+# La elección del algoritmo se hizo en la entrega 2 (**regresión logística L1**) y aquí se mantiene. Esta
+# sección solo mide su desempeño con **validación cruzada estratificada repetida (5×3) sobre entrenamiento**.
+# El conjunto de prueba no interviene (en la entrega 2 esta medición se hizo con el test; aquí se corrige).
+# Sirve de referencia para comprobar más adelante que el resultado en prueba es parecido, es decir, que no hay sobreajuste.
 
 # %%
 cv5 = StratifiedKFold(n_splits=5, shuffle=True, random_state=SEMILLA)
 cv_rep = RepeatedStratifiedKFold(n_splits=5, n_repeats=3, random_state=1)
 
-candidatos = {
-    "Logística L1 + KNN (propuesto)": Pipeline([("pre", preprocesador_knn()), ("modelo", logistica_l1())]),
-    "Logística L1 + mediana": Pipeline([("pre", preprocesador_mediana()), ("modelo", logistica_l1())]),
-    "Naive Bayes gaussiano + KNN": Pipeline([("pre", preprocesador_knn()), ("modelo", GaussianNB())]),
-    "Naive Bayes gaussiano + mediana": Pipeline([("pre", preprocesador_mediana()), ("modelo", GaussianNB())]),
-    "Random forest (entrega 2)": Pipeline([("pre", preprocesador_mediana()), ("modelo", RandomForestClassifier(
-        n_estimators=100, max_depth=4, min_samples_leaf=5, min_samples_split=50, max_features="log2",
-        random_state=SEMILLA, n_jobs=-1))]),
-    "Gradient boosting": Pipeline([("pre", preprocesador_mediana()), ("modelo", HistGradientBoostingClassifier(
-        max_depth=2, learning_rate=0.03, max_iter=150, random_state=SEMILLA))]),
-}
+propuesto = Pipeline([("pre", preprocesador_knn()), ("modelo", logistica_l1())])
 
-filas = []
-for nombre, cand in candidatos.items():
-    auc_cv = cross_val_score(cand, X_train, y_train, cv=cv_rep, scoring="roc_auc", n_jobs=-1)
-    brier_cv = -cross_val_score(cand, X_train, y_train, cv=cv5, scoring="neg_brier_score", n_jobs=-1)
-    cand.fit(X_train, y_train)
-    auc_train = roc_auc_score(y_train, cand.predict_proba(X_train)[:, 1])
-    filas.append({"modelo": nombre, "AUC CV": auc_cv.mean(), "± DE": auc_cv.std(), "AUC train": auc_train,
-                  "sobreajuste (train − CV)": auc_train - auc_cv.mean(), "Brier CV": brier_cv.mean()})
-comparacion = pd.DataFrame(filas).set_index("modelo").round(4)
+auc_cv = cross_val_score(propuesto, X_train, y_train, cv=cv_rep, scoring="roc_auc", n_jobs=-1)
+brier_cv = -cross_val_score(propuesto, X_train, y_train, cv=cv5, scoring="neg_brier_score", n_jobs=-1)
+propuesto.fit(X_train, y_train)
+auc_train = roc_auc_score(y_train, propuesto.predict_proba(X_train)[:, 1])
+comparacion = pd.DataFrame([{"AUC CV": auc_cv.mean(), "± DE": auc_cv.std(), "AUC train": auc_train,
+                             "sobreajuste (train − CV)": auc_train - auc_cv.mean(), "Brier CV": brier_cv.mean()}],
+                           index=["Logística L1 + KNN"]).round(4)
 comparacion
 
-# %%
-# ¿Y si se usan TODAS las variables (0 h o 24 h) en lugar de las 11? Se comprueba que el techo es del dataset.
-def auc_cv_todas(ventana_24h):
-    desenlaces = ["HospitalMortality", "Mortality28Days", "Mortality90Days", "Mortality1YearPostDischarge"]
-    Xa = datos.drop(columns=["PatientID", OBJETIVO, "APACHE II", "SAPSII"] + desenlaces)
-    if not ventana_24h:                                    # ventana 0 h: se quitan mediciones posteriores al ingreso
-        Xa = Xa[[c for c in Xa.columns if not any(s in c for s in ("_3h", "_6h", "24h"))]]
-    Xa = pd.get_dummies(Xa).astype(float).loc[X_train.index]
-    gb = HistGradientBoostingClassifier(max_depth=3, learning_rate=0.03, max_iter=200, random_state=SEMILLA)
-    return Xa.shape[1], cross_val_score(gb, Xa, y_train, cv=cv5, scoring="roc_auc").mean()
-
-for etiqueta, v24 in [("Todas las variables, ventana 0 h", False), ("Todas las variables, hasta 24 h", True)]:
-    p, auc = auc_cv_todas(v24)
-    comparacion.loc[f"Gradient boosting · {etiqueta}", ["AUC CV"]] = round(auc, 4)
-    print(f"{etiqueta}: {p} columnas → AUC CV {auc:.3f}")
-auc_cv_todas_0h = float(comparacion.loc["Gradient boosting · Todas las variables, ventana 0 h", "AUC CV"])
-auc_cv_todas_24h = float(comparacion.loc["Gradient boosting · Todas las variables, hasta 24 h", "AUC CV"])
-
-# %%
-fig, ax = plt.subplots(figsize=(7.5, 3.6))
-base = comparacion.dropna(subset=["± DE"]).sort_values("AUC CV")
-colores = [AZUL if "propuesto" in n else GRIS for n in base.index]
-ax.barh(base.index, base["AUC CV"], xerr=base["± DE"], color=colores, height=0.55,
-        error_kw=dict(ecolor=TINTA2, lw=1, capsize=3))
-for i, (v, s) in enumerate(zip(base["AUC CV"], base["± DE"])):
-    ax.text(v + s + 0.002, i, c(v), va="center", fontsize=9, color=TINTA2)
-ax.axvline(0.5, color=TINTA2, lw=1, ls="--"); ax.text(0.501, -0.75, "azar", fontsize=8, color=TINTA2)
-ax.set_xlim(0.48, 0.63); ax.set_xlabel("AUC-ROC en validación cruzada 5×3 (media ± DE)")
-ax.set_title("Ningún candidato supera a la logística L1"); ax.grid(axis="y", visible=False)
-guardar("01_comparacion_modelos")
-
 # %% [markdown]
-# **Lectura.** Las diferencias de AUC entre candidatos (milésimas) son menores que la desviación entre
-# particiones (≈ 0,013): estadísticamente son indistinguibles. Naive Bayes queda por debajo en AUC y,
-# sobre todo, en Brier: su supuesto de independencia se viola (choque séptico, vasopresor y presiones
-# están correlacionados), así que cuenta la misma evidencia varias veces y entrega probabilidades
-# exageradas. Los modelos de árboles no ganan discriminación y muestran una brecha train−CV cuatro veces mayor.
-# Usar las 58 o 72 columnas tampoco ayuda: el techo (AUC ≈ 0,58) es del conjunto de datos, no del algoritmo.
-#
-# **Decisión:** se mantiene la **regresión logística L1** de la entrega 2: iguala al mejor en
-# discriminación, casi no sobreajusta (brecha train−CV de 0,009 frente a 0,04 de los árboles) y es la única cuyas predicciones se pueden explicar a un
-# médico coeficiente por coeficiente.
+# **Lectura.** El AUC en validación cruzada es modesto y la brecha entre entrenamiento y validación
+# (`sobreajuste`) es pequeña: el modelo no memoriza los datos. Se mantiene la **regresión logística L1**
+# porque es la única cuyas predicciones se pueden explicar a un médico coeficiente por coeficiente.
 
 # %% [markdown]
 # ## 5. Modelo final: ajuste, coeficientes y calibración
@@ -291,7 +232,7 @@ ax.hlines(orden.index, 1, orden.values, color=[AZUL if v >= 1 else NARANJA for v
 ax.scatter(orden.values, orden.index, color=[AZUL if v >= 1 else NARANJA for v in orden.values], s=40, zorder=3)
 for nombre_v, v in orden.items():
     if abs(v - 1) > 0.02:
-        ax.text(v + 0.02, nombre_v, c(v, 2), va="center", fontsize=9, color=TINTA2)
+        ax.text(max(v, 1) + 0.02, nombre_v, c(v, 2), va="center", fontsize=9, color=TINTA2)   # a la derecha de la línea de 1
 ax.axvline(1, color=TINTA2, lw=1)
 ax.set_xlabel("Odds ratio por +1 unidad (o presencia frente a ausencia); focos frente al abdominal")
 ax.set_title("El choque séptico duplica los odds de fallecer"); ax.grid(axis="y", visible=False)
@@ -625,8 +566,6 @@ metricas = {
     "riesgo_min_test": float(p_test.min()), "riesgo_max_test": float(p_test.max()),
     "curva_decision": {"umbral_min_util": float(rango_util.min()), "umbral_max_util": float(rango_util.max()), "mejora_maxima": float(mejora.max())},
     "auc_test_entrega2_con_fuga": float(auc_e2),
-    "comparacion_modelos": a_dict(comparacion),
-    "auc_cv_todas_0h": auc_cv_todas_0h, "auc_cv_todas_24h": auc_cv_todas_24h,
 }
 artefacto = {
     "pipeline": modelo, "calibracion": {"a": CAL_A, "b": CAL_B}, "cortes": {"bajo": CORTE_BAJO, "alto": CORTE_ALTO},
@@ -660,7 +599,7 @@ print(f"Predicciones reproducidas correctamente | Paciente completo de ejemplo �
 # ## Conclusiones
 #
 # * El modelo final es la **regresión logística L1 de la entrega 2**, ahora dentro de un `Pipeline` sin fuga
-#   de datos y con probabilidades calibradas. Ni Naive Bayes, ni los árboles, ni usar todas las variables la superan.
+#   de datos y con probabilidades calibradas.
 # * La discriminación es **modesta pero real**: supera al azar y a SOFA al ingreso en la misma cohorte, y es
 #   estable entre validación cruzada y prueba (no hay sobreajuste).
 # * Las probabilidades están **bien calibradas**, pero solo cubren un rango estrecho (≈ 0,35–0,70): el modelo

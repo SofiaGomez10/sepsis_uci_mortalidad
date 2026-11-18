@@ -1,5 +1,5 @@
 {
-  "fecha_entrenamiento": "2026-11-16",
+  "fecha_entrenamiento": "2026-11-18",
   "n_total": 10000,
   "n_utilizable": 9330,
   "n_train": 6997,
@@ -119,65 +119,5 @@
     "umbral_max_util": 0.6549999999999999,
     "mejora_maxima": 0.07161370182389197
   },
-  "auc_test_entrega2_con_fuga": 0.5979506380716058,
-  "comparacion_modelos": {
-    "Logística L1 + KNN (propuesto)": {
-      "AUC CV": 0.5821,
-      "± DE": 0.0134,
-      "AUC train": 0.5911,
-      "sobreajuste (train − CV)": 0.009,
-      "Brier CV": 0.2434
-    },
-    "Logística L1 + mediana": {
-      "AUC CV": 0.5839,
-      "± DE": 0.0134,
-      "AUC train": 0.593,
-      "sobreajuste (train − CV)": 0.0091,
-      "Brier CV": 0.2432
-    },
-    "Naive Bayes gaussiano + KNN": {
-      "AUC CV": 0.5741,
-      "± DE": 0.0175,
-      "AUC train": 0.5776,
-      "sobreajuste (train − CV)": 0.0034,
-      "Brier CV": 0.2861
-    },
-    "Naive Bayes gaussiano + mediana": {
-      "AUC CV": 0.5741,
-      "± DE": 0.0171,
-      "AUC train": 0.5777,
-      "sobreajuste (train − CV)": 0.0037,
-      "Brier CV": 0.2833
-    },
-    "Random forest (entrega 2)": {
-      "AUC CV": 0.5832,
-      "± DE": 0.0135,
-      "AUC train": 0.6279,
-      "sobreajuste (train − CV)": 0.0447,
-      "Brier CV": 0.242
-    },
-    "Gradient boosting": {
-      "AUC CV": 0.5834,
-      "± DE": 0.0124,
-      "AUC train": 0.6236,
-      "sobreajuste (train − CV)": 0.0402,
-      "Brier CV": 0.2422
-    },
-    "Gradient boosting · Todas las variables, ventana 0 h": {
-      "AUC CV": 0.5693,
-      "± DE": null,
-      "AUC train": null,
-      "sobreajuste (train − CV)": null,
-      "Brier CV": null
-    },
-    "Gradient boosting · Todas las variables, hasta 24 h": {
-      "AUC CV": 0.5663,
-      "± DE": null,
-      "AUC train": null,
-      "sobreajuste (train − CV)": null,
-      "Brier CV": null
-    }
-  },
-  "auc_cv_todas_0h": 0.5693,
-  "auc_cv_todas_24h": 0.5663
+  "auc_test_entrega2_con_fuga": 0.5979506380716058
 }
