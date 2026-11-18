@@ -1,0 +1,183 @@
+{
+  "fecha_entrenamiento": "2026-11-16",
+  "n_total": 10000,
+  "n_utilizable": 9330,
+  "n_train": 6997,
+  "n_test": 2333,
+  "mortalidad": 0.46505894962486605,
+  "auc_cv": 0.5821,
+  "auc_cv_de": 0.0134,
+  "auc_test": 0.5941812891409665,
+  "auc_test_ic95": [
+    0.5714330393826171,
+    0.6168235371180409
+  ],
+  "auprc_test": 0.5658912197103013,
+  "auprc_test_ic95": [
+    0.5349576541960102,
+    0.5977231331129533
+  ],
+  "brier_test": 0.23998169761915164,
+  "brier_test_sin_calibrar": 0.24127136166416094,
+  "brier_referencia": 0.24877964635007063,
+  "calibracion_pendiente": 1.1438908558921883,
+  "calibracion_intercepto": 0.019005490989662838,
+  "sofa": {
+    "n": 2186,
+    "auc": 0.5640074078750763,
+    "auc_ic95": [
+      0.5394129052875983,
+      0.5872594988691677
+    ],
+    "auc_modelo_misma_muestra": 0.5947092619483554,
+    "diferencia": 0.030701854073279078,
+    "diferencia_ic95": [
+      0.006781046654142345,
+      0.0550819432023693
+    ]
+  },
+  "cortes": {
+    "bajo": 0.4281701190859615,
+    "alto": 0.5166715931340784
+  },
+  "en_corte_bajo": {
+    "corte": 0.4281701190859615,
+    "VP": 658.0,
+    "FP": 617.0,
+    "FN": 427.0,
+    "VN": 631.0,
+    "sensibilidad": 0.6064516129032258,
+    "especificidad": 0.5056089743589743,
+    "VPP": 0.516078431372549,
+    "VPN": 0.5964083175803403,
+    "accuracy": 0.5525075010715816,
+    "F1": 0.5576271186440678
+  },
+  "en_corte_alto": {
+    "corte": 0.5166715931340784,
+    "VP": 321.0,
+    "FP": 184.0,
+    "FN": 764.0,
+    "VN": 1064.0,
+    "sensibilidad": 0.295852534562212,
+    "especificidad": 0.8525641025641025,
+    "VPP": 0.6356435643564357,
+    "VPN": 0.5820568927789934,
+    "accuracy": 0.5936562366052294,
+    "F1": 0.4037735849056604
+  },
+  "estratos_test": {
+    "Menor riesgo": {
+      "n": 1058.0,
+      "fallecidos": 427.0,
+      "mortalidad_observada": 0.40359168241965976,
+      "riesgo_medio_predicho": 0.40597691838309913,
+      "% de pacientes": 45.3493356193742
+    },
+    "Riesgo intermedio": {
+      "n": 770.0,
+      "fallecidos": 337.0,
+      "mortalidad_observada": 0.43766233766233764,
+      "riesgo_medio_predicho": 0.449087920816303,
+      "% de pacientes": 33.004714959279895
+    },
+    "Mayor riesgo": {
+      "n": 505.0,
+      "fallecidos": 321.0,
+      "mortalidad_observada": 0.6356435643564357,
+      "riesgo_medio_predicho": 0.6148068904500124,
+      "% de pacientes": 21.645949421345907
+    }
+  },
+  "estratos_cv": {
+    "Menor riesgo": {
+      "n": 3161.0,
+      "fallecidos": 1302.0,
+      "mortalidad_observada": 0.41189496994621955,
+      "riesgo_medio_predicho": 0.40702330546806376,
+      "% de pacientes": 45.17650421609261
+    },
+    "Riesgo intermedio": {
+      "n": 2355.0,
+      "fallecidos": 1033.0,
+      "mortalidad_observada": 0.4386411889596603,
+      "riesgo_medio_predicho": 0.44907188536817566,
+      "% de pacientes": 33.65728169215378
+    },
+    "Mayor riesgo": {
+      "n": 1481.0,
+      "fallecidos": 919.0,
+      "mortalidad_observada": 0.6205266711681297,
+      "riesgo_medio_predicho": 0.6142581495023164,
+      "% de pacientes": 21.166214091753606
+    }
+  },
+  "riesgo_min_test": 0.3528920735256413,
+  "riesgo_max_test": 0.6826302216257062,
+  "curva_decision": {
+    "umbral_min_util": 0.38999999999999996,
+    "umbral_max_util": 0.6549999999999999,
+    "mejora_maxima": 0.07161370182389197
+  },
+  "auc_test_entrega2_con_fuga": 0.5979506380716058,
+  "comparacion_modelos": {
+    "Logística L1 + KNN (propuesto)": {
+      "AUC CV": 0.5821,
+      "± DE": 0.0134,
+      "AUC train": 0.5911,
+      "sobreajuste (train − CV)": 0.009,
+      "Brier CV": 0.2434
+    },
+    "Logística L1 + mediana": {
+      "AUC CV": 0.5839,
+      "± DE": 0.0134,
+      "AUC train": 0.593,
+      "sobreajuste (train − CV)": 0.0091,
+      "Brier CV": 0.2432
+    },
+    "Naive Bayes gaussiano + KNN": {
+      "AUC CV": 0.5741,
+      "± DE": 0.0175,
+      "AUC train": 0.5776,
+      "sobreajuste (train − CV)": 0.0034,
+      "Brier CV": 0.2861
+    },
+    "Naive Bayes gaussiano + mediana": {
+      "AUC CV": 0.5741,
+      "± DE": 0.0171,
+      "AUC train": 0.5777,
+      "sobreajuste (train − CV)": 0.0037,
+      "Brier CV": 0.2833
+    },
+    "Random forest (entrega 2)": {
+      "AUC CV": 0.5832,
+      "± DE": 0.0135,
+      "AUC train": 0.6279,
+      "sobreajuste (train − CV)": 0.0447,
+      "Brier CV": 0.242
+    },
+    "Gradient boosting": {
+      "AUC CV": 0.5834,
+      "± DE": 0.0124,
+      "AUC train": 0.6236,
+      "sobreajuste (train − CV)": 0.0402,
+      "Brier CV": 0.2422
+    },
+    "Gradient boosting · Todas las variables, ventana 0 h": {
+      "AUC CV": 0.5693,
+      "± DE": null,
+      "AUC train": null,
+      "sobreajuste (train − CV)": null,
+      "Brier CV": null
+    },
+    "Gradient boosting · Todas las variables, hasta 24 h": {
+      "AUC CV": 0.5663,
+      "± DE": null,
+      "AUC train": null,
+      "sobreajuste (train − CV)": null,
+      "Brier CV": null
+    }
+  },
+  "auc_cv_todas_0h": 0.5693,
+  "auc_cv_todas_24h": 0.5663
+}

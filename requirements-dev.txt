@@ -1,0 +1,6 @@
+# Solo para reentrenar (cuaderno) y correr las pruebas.
+-r requirements.txt
+matplotlib>=3.9
+jupyter
+jupytext
+pytest

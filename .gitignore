@@ -1,0 +1,8 @@
+# Datos clínicos: no se versionan (ver data/README.md)
+data/*.csv
+# Secretos del despliegue
+.streamlit/secrets.toml
+__pycache__/
+.ipynb_checkpoints/
+.pytest_cache/
+.venv/
