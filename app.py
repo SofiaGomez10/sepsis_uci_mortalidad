@@ -8,7 +8,6 @@ from pathlib import Path
 
 import streamlit as st
 
-from src import asistente as A
 from src import estilo as E
 from src import modelo as M
 
@@ -22,25 +21,11 @@ st.markdown(E.CSS, unsafe_allow_html=True)
 # ----------------------------------------------------------------------------- recursos (se cargan una vez)
 @st.cache_resource(show_spinner="Cargando modelo...")
 def recursos():
-    art = M.cargar()
-    return art, A.BaseConocimiento(art)
+    return M.cargar()
 
 
-def config_llm() -> dict | None:
-    """Lee la configuración opcional del modelo de lenguaje desde los secretos del despliegue."""
-    try:
-        clave = st.secrets.get("LLM_API_KEY")
-    except Exception:
-        return None
-    if not clave or "pegue-aqui" in clave:
-        return None
-    return {"api_key": clave, "base_url": st.secrets.get("LLM_BASE_URL", "https://api.groq.com/openai/v1"),
-            "model": st.secrets.get("LLM_MODEL", "")}
-
-
-ART, KB = recursos()
+ART = recursos()
 MET, CORTES = ART["metricas"], ART["cortes"]
-LLM = config_llm()
 n = E.n
 
 st.markdown(E.barra(MET["fecha_entrenamiento"], ART["versiones"]["scikit-learn"]), unsafe_allow_html=True)
@@ -64,7 +49,6 @@ for clave, valor in VACIO.items():
     st.session_state.setdefault(f"in_{clave}", valor)
 st.session_state.setdefault("resultado", None)
 st.session_state.setdefault("avisos", [])
-st.session_state.setdefault("chat", [])
 
 
 def cargar_caso(valores: dict):
@@ -79,7 +63,7 @@ def numero(var: str):
                            format=f"%.{meta['decimales']}f", placeholder="Se calcula" if var == "MAP_0" else "Requerido", help=meta["ayuda"])
 
 
-t_eval, t_asis, t_des, t_ficha = st.tabs(["Evaluación del paciente", "Asistente de interpretación", "Desempeño del modelo", "Ficha técnica"])
+t_eval, t_des, t_ficha = st.tabs(["Evaluación del paciente", "Desempeño del modelo", "Ficha técnica"])
 
 # ============================================================================= 1. evaluación del paciente
 with t_eval:
@@ -169,53 +153,8 @@ with t_eval:
                 for a in notas:
                     st.markdown(f'<div class="nota {"alerta" if a["nivel"] == "aviso" else ""}">{escape(a["texto"])}</div>', unsafe_allow_html=True)
             st.markdown(f'<div class="nota" style="margin-top:14px"><b>Cómo usar este resultado.</b> El modelo ordena a los pacientes mejor que el azar y que el SOFA al ingreso, '
-                        f'pero su capacidad de discriminación es baja (AUC {n(MET["auc_test"], 2)}). Úselo como un dato más junto a la valoración clínica. '
-                        'Para entender cualquier cifra, consulte la pestaña "Asistente de interpretación".</div>', unsafe_allow_html=True)
-
-# ============================================================================= 2. asistente
-with t_asis:
-    izq, der = st.columns([0.66, 0.34], gap="large")
-    with der:
-        modo = f"Generativo ({escape(LLM['model'])})" if LLM and LLM.get("model") else "Local (sin servicios externos)"
-        st.markdown(f"""<div class="tarjeta"><div class="rotulo">Acerca del asistente</div>
-        <div style="font-size:.88rem; line-height:1.55; color:#3D4B59">Responde preguntas sobre <b>cómo funciona el modelo y cómo leer su resultado</b>:
-        coeficientes, odds ratios, métricas, estratos y límites de uso. Busca la respuesta en la documentación del propio modelo,
-        de modo que las cifras siempre coinciden con las de la aplicación. Si ya evaluó un paciente, explica con sus valores cómo influyó cada dato.<br><br>No da recomendaciones de tratamiento.<br><br>
-        <b>Modo actual:</b> {modo}</div></div>""", unsafe_allow_html=True)
-        compartir = False
-        if LLM and LLM.get("model"):
-            compartir = st.checkbox("Incluir los datos del paciente evaluado en la consulta al servicio de lenguaje", value=False,
-                                    help="Si no se marca, lo relativo al paciente se resuelve localmente y solo se envían la pregunta y la documentación del modelo.")
-        st.markdown('<div class="rotulo">Preguntas frecuentes</div>', unsafe_allow_html=True)
-        sugerida = None
-        for i, p in enumerate(A.PREGUNTAS_SUGERIDAS + (A.PREGUNTAS_PACIENTE if st.session_state["resultado"] else A.PREGUNTAS_PACIENTE[:1])):
-            if st.button(p, key=f"sug_{i}", width='stretch'):
-                sugerida = p
-        if st.session_state["chat"] and st.button("Borrar conversación"):
-            st.session_state["chat"] = []
-            st.rerun()
-
-    with izq:
-        with st.form("pregunta", clear_on_submit=True, border=False):
-            c1, c2 = st.columns([0.82, 0.18])
-            texto = c1.text_input("Pregunta", placeholder="Por ejemplo: ¿qué significa el coeficiente del INR?", label_visibility="collapsed")
-            enviar = c2.form_submit_button("Preguntar", type="primary", width='stretch')
-        pregunta = sugerida or (texto.strip() if enviar and texto.strip() else None)
-        if pregunta:
-            historial = [{"role": "user" if m["rol"] == "u" else "assistant", "content": m["texto"]} for m in st.session_state["chat"]]
-            r = A.responder(KB, pregunta, st.session_state["resultado"], LLM, compartir, historial)
-            st.session_state["chat"] += [{"rol": "u", "texto": pregunta}, {"rol": "a", "texto": r["texto"], "fuentes": r["fuentes"], "modo": r["modo"]}]
-
-        if not st.session_state["chat"]:
-            st.markdown('<div class="tarjeta vacio"><b>Haga una pregunta sobre el modelo</b>Escríbala arriba o elija una de las preguntas frecuentes.<br>'
-                        'Si ya evaluó un paciente, puede preguntar por qué obtuvo ese resultado o cómo influyó cada dato, por ejemplo: «¿Por qué el lactato dio así en este paciente?».</div>', unsafe_allow_html=True)
-        # Se muestran primero los intercambios más recientes (pregunta y, debajo, su respuesta).
-        chat = st.session_state["chat"]
-        for i in range(len(chat) - 2, -1, -2):
-            st.markdown(E.mensaje("u", chat[i]["texto"]) + E.mensaje("a", chat[i + 1]["texto"], chat[i + 1].get("fuentes"), chat[i + 1].get("modo")),
-                        unsafe_allow_html=True)
-
-# ============================================================================= 3. desempeño
+                        f'pero su capacidad de discriminación es baja (AUC {n(MET["auc_test"], 2)}). Úselo como un dato más junto a la valoración clínica.</div>', unsafe_allow_html=True)
+# ============================================================================= 2. desempeño
 with t_des:
     s, b, a = MET["sofa"], MET["en_corte_bajo"], MET["en_corte_alto"]
     st.markdown('<div class="kpis">'
@@ -240,7 +179,7 @@ with t_des:
                 st.image(str(FIGURAS / f"{archivo}.png"), width='stretch')
                 st.caption(pie)
 
-# ============================================================================= 4. ficha técnica
+# ============================================================================= 3. ficha técnica
 with t_ficha:
     izq, der = st.columns(2, gap="large")
     with izq:
@@ -273,4 +212,4 @@ with t_ficha:
         No aplica a población pediátrica ni a pacientes fuera de UCI.<br>
         Requiere reentrenamiento, validación local y aval ético antes de cualquier uso asistencial.</div></div>""", unsafe_allow_html=True)
         st.markdown("""<div class="tarjeta"><div class="rotulo">Privacidad</div><div style="font-size:.88rem; line-height:1.6; color:#3D4B59">
-        La aplicación no solicita identificadores ni almacena los valores digitados. El asistente en modo local no envía información a terceros.</div></div>""", unsafe_allow_html=True)
+        La aplicación no solicita identificadores ni almacena los valores digitados.</div></div>""", unsafe_allow_html=True)

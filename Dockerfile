@@ -5,7 +5,6 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 COPY app.py ./
 COPY src ./src
-COPY kb ./kb
 COPY models ./models
 COPY reports ./reports
 COPY .streamlit/config.toml ./.streamlit/config.toml

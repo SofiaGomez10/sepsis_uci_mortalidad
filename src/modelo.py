@@ -136,21 +136,15 @@ def predecir(art: dict, valores: dict) -> dict:
         i = art["cols_num"].index(c)
         filas.append({"variable": c, "etiqueta": etiqueta(c), "contribucion": float(contrib[c]),
                       "valor": valores.get(c), "valor_usado": usado[c],
-                      # Datos para que el asistente explique cada variable con los valores del paciente:
-                      "promedio": float(escalador.mean_[i]),          # promedio de la cohorte (unidades originales)
-                      "z": float(xt[c]),                              # cuántas desviaciones estándar se aleja del promedio
-                      "coef": float(logit.coef_[0][nombres.index(c)])})  # coeficiente por desviación estándar
+                      })
     foco = valores.get("InfectionSource")
     c_foco = float(sum(contrib[n] for n in nombres if n.startswith("InfectionSource_")))
     filas.append({"variable": "InfectionSource", "etiqueta": etiqueta("InfectionSource"), "contribucion": c_foco,
-                  "valor": foco, "valor_usado": foco, "promedio": None, "z": None, "coef": None})
+                  "valor": foco, "valor_usado": foco})
     for f in filas:
         # Efecto en puntos porcentuales: riesgo actual menos el riesgo si esa variable estuviera en el promedio.
         f["efecto_pp"] = (riesgo - sigmoide(a * (z - f["contribucion"]) + b)) * 100
     filas.sort(key=lambda f: abs(f["contribucion"]), reverse=True)
-    for i, f in enumerate(filas, 1):
-        f["puesto"] = i                                              # lugar por magnitud del aporte en este paciente
-
     cortes = art["cortes"]
     estrato = art["estratos"][2] if riesgo >= cortes["alto"] else art["estratos"][1] if riesgo >= cortes["bajo"] else art["estratos"][0]
     return {"riesgo": riesgo, "log_odds": z, "estrato": estrato, "contribuciones": filas,

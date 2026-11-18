@@ -64,11 +64,6 @@ html, body, [class*="css"] {font-feature-settings: "tnum" 1, "lnum" 1;}
 .kpi .x {font-size: 1.7rem; font-weight: 700; color: #16212E; margin: 4px 0 2px 0;}
 .kpi .d {font-size: .78rem; color: #5B6B7A; line-height: 1.35;}
 
-.msg {max-width: 88%; padding: 12px 16px; border-radius: 10px; font-size: .92rem; line-height: 1.55; margin-bottom: 10px; border: 1px solid #DDE3E9;}
-.msg.u {margin-left: auto; background: #12324A; color: #fff; border-color: #12324A;}
-.msg.a {background: #fff; color: #16212E;}
-.msg .quien {font-size: .68rem; font-weight: 700; letter-spacing: .09em; text-transform: uppercase; opacity: .7; margin-bottom: 4px;}
-.msg .fuentes {font-size: .76rem; color: #5B6B7A; margin-top: 10px; padding-top: 8px; border-top: 1px solid #EEF1F4;}
 
 table.ficha {width: 100%; border-collapse: collapse; font-size: .88rem;}
 table.ficha th {text-align: left; font-size: .7rem; letter-spacing: .08em; text-transform: uppercase; color: #5B6B7A; border-bottom: 1px solid #DDE3E9; padding: 8px 10px;}
@@ -133,13 +128,3 @@ def filas_contribucion(filas: list[dict], formato) -> str:
 
 def kpi(titulo: str, cifra: str, detalle: str) -> str:
     return f'<div class="kpi"><div class="t">{escape(titulo)}</div><div class="x">{cifra}</div><div class="d">{detalle}</div></div>'
-
-
-def mensaje(rol: str, texto: str, fuentes: list | None = None, modo: str | None = None) -> str:
-    cuerpo = escape(texto).replace("\n\n", "<br><br>").replace("\n", "<br>")
-    pie = ""
-    if fuentes:
-        pie = '<div class="fuentes">Fuentes consultadas: ' + " · ".join(escape(f["titulo"]) for f in fuentes) + \
-              (f' &nbsp;|&nbsp; Modo {escape(modo)}' if modo else "") + "</div>"
-    quien = "Usted" if rol == "u" else "Asistente de interpretación"
-    return f'<div class="msg {rol}"><div class="quien">{quien}</div>{cuerpo}{pie}</div>'
