@@ -22,6 +22,7 @@ durante su estancia, la ubica en un estrato de riesgo y muestra qué variables s
 | `reports/figuras/` | Figuras de resultados generadas por el cuaderno |
 | `tests/test_app.py` | Pruebas automáticas del artefacto y la inferencia |
 | `Dockerfile` | Imagen para desplegar |
+| `docker-compose.yml` | yml para correr el contenedor del proyecto |
 
 ## Arquitectura
 
@@ -43,7 +44,11 @@ El código anterior queda comentado en `src/modelo.py` y `app.py` bajo el rótul
 La aplicación no entrena ni recalcula nada: carga un único artefacto.
 
 ## Ejecutar en local
-
+### 1. Docker
+```bash
+docker compose up -d
+```
+### 2. Python
 ```bash
 python -m venv .venv && source .venv/bin/activate      # Windows: .venv\Scripts\activate
 pip install -r requirements.txt
