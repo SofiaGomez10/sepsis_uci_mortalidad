@@ -67,17 +67,8 @@ el artefacto debe abrirse con la misma versión de scikit-learn con la que se gu
 
 Cada `git push` a la rama vuelve a desplegar la aplicación automáticamente.
 
-## Reentrenar
 
-```bash
-pip install -r requirements-dev.txt
-# copie CriticalData_Sepsis.csv en data/
-jupyter execute notebooks/Entrega3_modelo_final.ipynb      # o ábralo en Colab y ejecute todo
-pytest -q
-```
-
-El cuaderno regenera `models/` y `reports/figuras/`. Si cambian las variables o sus nombres, actualice las etiquetas
-en `src/modelo.py`.
+El cuaderno regenera `models/` y `reports/figuras/`. 
 
 ## Resultados del modelo (conjunto de prueba, 2.333 pacientes)
 
