@@ -27,7 +27,7 @@ durante su estancia, la ubica en un estrato de riesgo y muestra qué variables s
 ## Arquitectura
 
 ```
-ENTRENAMIENTO (cuaderno)               SERVICIO (aplicación)
+ENTRENAMIENTO (cuaderno)                               SERVICIO (aplicación)
 CSV  ->  partición 75/25  ->  Pipeline                  formulario -> validación -> modelo -> calibración
          [escalado + imputación KNN + one-hot           -> probabilidad + estrato + contribuciones
           + regresión logística L1]
