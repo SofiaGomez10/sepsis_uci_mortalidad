@@ -1,4 +1,3 @@
-# Imagen para desplegar la aplicación dentro de la red de una institución (sin salida a internet).
 FROM python:3.13-slim
 WORKDIR /app
 COPY requirements.txt .
