@@ -1,0 +1,8 @@
+services:
+  app:
+    build: .
+    image: sepsis-uci:latest
+    container_name: sepsis-uci
+    ports:
+      - "8501:8501"
+    restart: unless-stopped
