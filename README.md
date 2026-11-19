@@ -60,12 +60,10 @@ el artefacto debe abrirse con la misma versión de scikit-learn con la que se gu
 
 ## Desplegar en Streamlit Community Cloud
 
-1. Suba esta carpeta a un repositorio de GitHub (el CSV no se sube: está en `.gitignore`).
+1. Suba esta carpeta a un repositorio de GitHub.
 2. Entre a <https://share.streamlit.io>, inicie sesión con GitHub y elija "Create app".
 3. Seleccione el repositorio, la rama `main` y el archivo principal `app.py`.
-4. En "Advanced settings" elija **Python 3.13**. La versión de Python no se puede cambiar después sin borrar y
-   volver a crear la app.
-5. "Deploy". En pocos minutos queda disponible en una dirección `https://<nombre>.streamlit.app`.
+4. "Deploy". En pocos minutos queda disponible en una dirección `https://<nombre>.streamlit.app`.
 
 Cada `git push` a la rama vuelve a desplegar la aplicación automáticamente.
 
