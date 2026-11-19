@@ -80,8 +80,3 @@ El cuaderno regenera `models/` y `reports/figuras/`.
 | AUPRC | 0,566 (prevalencia 0,465) |
 | Brier | 0,240 (referencia 0,249) |
 | Mortalidad observada por estrato | 40,4 % · 43,8 % · 63,6 % |
-
-## Límites
-
-Discriminación baja; un único conjunto de datos de procedencia no documentada (posiblemente sintético); sin
-validación externa; solo usa información del ingreso. Ver la pestaña "Ficha técnica" de la aplicación.
