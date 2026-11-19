@@ -72,11 +72,11 @@ El cuaderno regenera `models/` y `reports/figuras/`.
 
 ## Resultados del modelo (conjunto de prueba, 2.333 pacientes)
 
-| Métrica | Valor |
-|---|---|
-| AUC-ROC | 0,594 (IC 95 %: 0,571 a 0,617) |
-| AUC-ROC en validación cruzada | 0,582 |
-| AUC-ROC del SOFA al ingreso | 0,564 |
-| AUPRC | 0,566 (prevalencia 0,465) |
-| Brier | 0,240 (referencia 0,249) |
-| Mortalidad observada por estrato | 40,4 % · 43,8 % · 63,6 % |
+| Métrica | Valor | ¿Qué significa? |
+|---|---|---|
+| AUC-ROC | 0,594 (IC 95 %: 0,571 a 0,617) | Probabilidad de que el modelo asigne mayor riesgo a un paciente que fallece que a uno que sobrevive. 0,5 es azar y 1,0 es perfecto. El IC 95 % es el rango donde probablemente está el valor real. |
+| AUC-ROC en validación cruzada | 0,582 | El mismo AUC, pero promediado al entrenar y probar con distintas partes de los datos. Confirma que el resultado es estable y no fruto de una división afortunada. |
+| AUC-ROC del SOFA al ingreso | 0,564 | AUC que obtiene solo la puntuación SOFA (gravedad de falla de órganos) al ingreso. Es la referencia con la que se compara el modelo. |
+| AUPRC | 0,566 (prevalencia 0,465) | Área bajo la curva precisión-sensibilidad. Mide qué tan bien detecta a los fallecidos sin dar demasiadas falsas alarmas. El punto de comparación es la prevalencia (0,465), que es lo que se obtendría al azar. |
+| Brier | 0,240 (referencia 0,249) | Error cuadrático medio de las probabilidades predichas. Menor es mejor; 0 es perfecto. La referencia (0,249) es la de un modelo que siempre predice la prevalencia. |
+| Mortalidad observada por estrato | 40,4 % · 43,8 % · 63,6 % | Porcentaje de pacientes que realmente fallecieron en cada grupo de riesgo (bajo, medio, alto). Un buen modelo muestra que la mortalidad sube entre grupos. |
