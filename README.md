@@ -21,7 +21,7 @@ durante su estancia, la ubica en un estrato de riesgo y muestra qué variables s
 | `models/metricas.json` | Métricas del modelo en formato legible |
 | `reports/figuras/` | Figuras de resultados generadas por el cuaderno |
 | `tests/test_app.py` | Pruebas automáticas del artefacto y la inferencia |
-| `Dockerfile` | Imagen para desplegar dentro de la red de una institución |
+| `Dockerfile` | Imagen para desplegar |
 
 ## Arquitectura
 
