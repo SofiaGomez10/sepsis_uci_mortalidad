@@ -18,7 +18,7 @@ RUTA_ARTEFACTO = Path(__file__).resolve().parent.parent / "models" / "modelo_sep
 # Nombre clínico, unidad, ayuda y formato de cada variable, tal como se muestran en la aplicación.
 VARIABLES = {
     "Age": {"corta": "Edad (años)", "etiqueta": "Edad", "unidad": "años", "ayuda": "Edad del paciente al ingreso a UCI.", "paso": 1.0, "decimales": 0},
-    "FrailtyScore": {"corta": "Fragilidad (1-7)", "etiqueta": "Fragilidad clínica", "unidad": "de 7", "ayuda": "Escala de fragilidad clínica previa al episodio: 1 = robusto, 7 = fragilidad severa.", "paso": 1.0, "decimales": 0},
+    "FrailtyScore": {"corta": "Fragilidad (1-9)", "etiqueta": "Fragilidad clínica", "unidad": "de 9", "ayuda": "Escala de Fragilidad Clínica previa al episodio: 1 = muy en forma, 9 = enfermedad terminal. Los datos de entrenamiento solo incluyen valores de 1 a 7.", "paso": 1.0, "decimales": 0},
     "SBP_0": {"corta": "PA sistólica (mmHg)", "etiqueta": "Presión arterial sistólica", "unidad": "mmHg", "ayuda": "Primera medición al ingreso.", "paso": 1.0, "decimales": 0},
     "DBP_0": {"corta": "PA diastólica (mmHg)", "etiqueta": "Presión arterial diastólica", "unidad": "mmHg", "ayuda": "Primera medición al ingreso.", "paso": 1.0, "decimales": 0},
     "MAP_0": {"corta": "PA media (mmHg)", "etiqueta": "Presión arterial media", "unidad": "mmHg", "ayuda": "Si se deja vacía se calcula como (PAS + 2 x PAD) / 3.", "paso": 1.0, "decimales": 0},
