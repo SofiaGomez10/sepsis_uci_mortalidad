@@ -51,7 +51,7 @@ El modelo utiliza 11 variables registradas al ingreso a UCI (hora 0). Los rangos
 | Variable en los datos | Nombre clínico | Tipo y unidad | Rango en entrenamiento | Mediana | Descripción |
 |---|---|---|---|---|---|
 | `Age` | Edad | Numérica, años | 18 a 95 | 65 | Edad del paciente al ingreso a UCI. |
-| `FrailtyScore` | Fragilidad clínica | Numérica, escala de 1 a 7 | 1 a 7 | 4 | Fragilidad previa al episodio: 1 corresponde a un paciente robusto y 7 a fragilidad severa. |
+| `FrailtyScore` | Fragilidad clínica | Numérica, escala de 1 a 9 | 1 a 7 | 4 | Fragilidad previa al episodio: 1 corresponde a un paciente muy en forma y 9 a un paciente con enfermedad terminal. |
 | `SBP_0` | Presión arterial sistólica | Numérica, mmHg | 32 a 160 | 94 | Primera medición al ingreso. |
 | `DBP_0` | Presión arterial diastólica | Numérica, mmHg | 30 a 90 | 57 | Primera medición al ingreso. |
 | `MAP_0` | Presión arterial media | Numérica, mmHg | 40 a 120 | 69 | Primera medición al ingreso. Si no se registra, la aplicación la calcula como (sistólica + 2 × diastólica) / 3. |
