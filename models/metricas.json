@@ -118,6 +118,5 @@
     "umbral_min_util": 0.38999999999999996,
     "umbral_max_util": 0.6549999999999999,
     "mejora_maxima": 0.07161370182389197
-  },
-  "auc_test_entrega2_con_fuga": 0.5979506380716058
+  }
 }
