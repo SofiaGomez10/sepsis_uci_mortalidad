@@ -81,10 +81,10 @@ def n(x: float, d: int = 1) -> str:
 
 
 def barra(fecha: str, version_sklearn: str) -> str:
+    """Encabezado de la aplicación: título en la barra oscura y, debajo, el aviso de uso."""
     return f"""<div class="barra"><div class="marca"><div class="sello"><span></span></div><div>
-    <h1>Estratificación de riesgo en sepsis · UCI adultos</h1>
-    <div class="sub">Probabilidad estimada de mortalidad en UCI con datos del ingreso</div></div></div>
-    <div class="meta"><b>Prototipo académico</b><br>Modelo: regresión logística L1 · {escape(fecha)}<br>Universidad Autónoma de Occidente</div></div>
+    <h1>Estratificación de riesgo en sepsis - UCI adultos</h1>
+    <div class="sub">Probabilidad estimada de mortalidad en UCI con datos del ingreso</div></div></div></div>
     <div class="aviso-uso"><b>Herramienta de apoyo, no de decisión.</b> No sustituye el juicio clínico ni debe usarse para limitar o negar atención. No ingrese datos que identifiquen al paciente.</div>"""
 
 
