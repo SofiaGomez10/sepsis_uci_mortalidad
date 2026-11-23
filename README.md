@@ -1,12 +1,12 @@
 # Estratificación de riesgo de mortalidad en UCI por sepsis
 
-Tercer entregable del proyecto de Inteligencia Artificial (Universidad Autónoma de Occidente, 2026-2).
+Entregable del proyecto de Inteligencia Artificial.
 
 **Integrantes:** Sofía Gómez Rodríguez, Emmanuel Escobar Santos y Víctor Andrés Martínez Preciado.
 
 Aplicación web que, a partir de los datos del ingreso a UCI, estima la probabilidad de que un adulto con sepsis fallezca durante su estancia, lo ubica en un estrato de riesgo y muestra qué variables explican la estimación.
 
-> Prototipo académico de apoyo a la decisión clínica. No es un dispositivo médico ni sustituye el juicio del profesional de salud.
+> Es importante resaltar que la herramienta debe utilizarse siempre bajo el criterio del médico tratante.
 
 ## Contenido del repositorio
 
@@ -29,20 +29,41 @@ Aplicación web que, a partir de los datos del ingreso a UCI, estima la probabil
 El proyecto se divide en dos etapas independientes, conectadas por un único archivo: `models/modelo_sepsis.joblib`.
 
 **1. Entrenamiento (cuaderno).**
-1. Se cargan los datos y se dividen en entrenamiento (75 %) y prueba (25 %).
-2. Se ajusta un pipeline que integra el escalado, la imputación KNN, la codificación del foco de infección y la regresión logística con regularización L1.
-3. Se calibran las probabilidades con el método de Platt y se definen los puntos de corte de los estratos, usando validación cruzada sobre el entrenamiento.
-4. Se evalúa el modelo en el conjunto de prueba.
-5. Se exportan el modelo y sus métricas a la carpeta `models/`.
+1.Se cargan los datos y se dividen en entrenamiento (75 %) y prueba (25 %).
+2.Se ajusta un pipeline que integra el escalado, la imputación KNN, la codificación del foco de infección y la regresión logística con regularización L1.
+3.Se calibran las probabilidades con el método de Platt y se definen los puntos de corte de los estratos, usando validación cruzada sobre el entrenamiento.
+4.Se evalúa el modelo en el conjunto de prueba.
+5.Se exportan el modelo y sus métricas a la carpeta `models/`.
 
 **2. Servicio (aplicación).**
-1. El médico ingresa los datos del paciente en el formulario.
-2. Se validan los datos: campos obligatorios, rangos y coherencia clínica.
-3. El modelo calcula el riesgo calibrado, el estrato y la contribución de cada variable.
+1.El médico ingresa los datos del paciente en el formulario.
+2.Se validan los datos: campos obligatorios, rangos y coherencia clínica.
+3.El modelo calcula el riesgo calibrado, el estrato y la contribución de cada variable.
 
-La imputación KNN se utiliza únicamente durante el entrenamiento, porque el conjunto de datos contiene valores faltantes. En la aplicación todos los campos son obligatorios; la única excepción es la presión arterial media, que se calcula a partir de la sistólica y la diastólica si se deja vacía. La versión anterior, que sí imputaba, se conserva comentada en `src/modelo.py` y `app.py`.
+La imputación KNN se utiliza únicamente durante el entrenamiento, porque el conjunto de datos contiene valores faltantes. En la aplicación todos los campos son obligatorios; la única excepción es la presión arterial media, que se calcula a partir de la sistólica y la diastólica si se deja vacía. 
 
 La aplicación no entrena ni recalcula nada: solo carga el modelo exportado.
+
+## Diccionario de variables
+
+El modelo utiliza 11 variables registradas al ingreso a UCI (hora 0). Los rangos y medianas corresponden al conjunto de entrenamiento (6.997 pacientes).
+
+| Variable en los datos | Nombre clínico | Tipo y unidad | Rango en entrenamiento | Mediana | Descripción |
+|---|---|---|---|---|---|
+| `Age` | Edad | Numérica, años | 18 a 95 | 65 | Edad del paciente al ingreso a UCI. |
+| `FrailtyScore` | Fragilidad clínica | Numérica, escala de 1 a 7 | 1 a 7 | 4 | Fragilidad previa al episodio: 1 corresponde a un paciente robusto y 7 a fragilidad severa. |
+| `SBP_0` | Presión arterial sistólica | Numérica, mmHg | 32 a 160 | 94 | Primera medición al ingreso. |
+| `DBP_0` | Presión arterial diastólica | Numérica, mmHg | 30 a 90 | 57 | Primera medición al ingreso. |
+| `MAP_0` | Presión arterial media | Numérica, mmHg | 40 a 120 | 69 | Primera medición al ingreso. Si no se registra, la aplicación la calcula como (sistólica + 2 × diastólica) / 3. |
+| `Lactate_0h` | Lactato | Numérica, mmol/L | 0 a 15 | 3,0 | Lactato sérico al ingreso. |
+| `INR_0h` | INR | Numérica, sin unidad | 0,8 a 3,19 | 1,3 | Razón internacional normalizada al ingreso. |
+| `SOFA_0h` | Puntaje SOFA | Numérica, puntos | 0 a 6 | 2 | Evaluación secuencial de falla orgánica al ingreso. |
+| `SepticShock` | Choque séptico | Binaria (sí / no) | No aplica | No aplica | Hipotensión que requiere vasopresor para mantener una PAM de 65 mmHg o más, con lactato mayor de 2 mmol/L pese a la reanimación (criterios Sepsis-3). |
+| `VasopressorUse_0h` | Vasopresor al ingreso | Binaria (sí / no) | No aplica | No aplica | Indica si el paciente recibe vasopresor en la hora 0. |
+| `InfectionSource` | Foco de infección | Categórica | Abdominal, pulmonar, urinario, piel y tejidos blandos, desconocido | No aplica | Foco identificado al ingreso. El foco abdominal es la categoría de referencia del modelo. |
+
+**Variable objetivo:** `MortalityInICU`, que indica si el paciente falleció durante su estancia en UCI (1 = sí, 0 = no). La mortalidad observada en la cohorte es del 46,5 %.
+
 
 ## Ejecución en local
 
