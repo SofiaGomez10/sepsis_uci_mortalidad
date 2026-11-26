@@ -485,7 +485,7 @@ figure img{max-width:100%;max-height:740px;display:block}
   <div class="tres">
     <div class="dato chico"><span>Streamlit Cloud</span><p>publicación desde GitHub; cada cambio en la rama principal se despliega solo</p></div>
     <div class="dato chico"><span>Docker</span><p>alternativa para instalar la aplicación dentro de la red de una clínica</p></div>
-    <div class="dato chico"><span>Python 3.13</span><p>versiones fijadas para abrir el modelo con la misma librería con que se guardó</p></div>
+    <div class="dato chico"><span data-fijo>Python 3.13</span><p>versiones fijadas para abrir el modelo con la misma librería con que se guardó</p></div>
   </div>
 </div><footer class="ft"><span class="cruz"></span><span>Riesgo de mortalidad en UCI por sepsis</span><span class="sp"></span><span>Inteligencia Artificial · UAO</span></footer></section><section class="slide"><header class="hd"><span class="sec">La aplicación</span><span class="num">18 <i>/</i> 20</span></header>
 <div class="cuerpo app">
@@ -527,7 +527,7 @@ function fit(){const s=Math.min(innerWidth/1920,innerHeight/1080);stage.style.tr
 const ESCALONADOS='.cuerpo>h2,.sig-izq>h2,.eqp,.chips,.ctl,.sig-der,.gv,.vr,.pie-v,.tr,.cuerpo>.dos>div,.lead,blockquote,.req,.k,.dos-b>div,.v,.dato,.lado>h2,.grande,.txt,.tabla-k>div,.pie,.e,figure,.col-arq,.art,.d,.tab,.demo,.lim>div,.concl>div,.gracias,.leyenda';
 function escalonar(sl){if(reduce)return;let d=0.08;sl.querySelectorAll(ESCALONADOS).forEach(el=>{if(el.closest('.portada'))return;el.style.animation='none';void el.offsetWidth;el.style.animation=`subir .6s cubic-bezier(.2,.7,.2,1) ${d}s both`;d+=0.06;});}
 function contar(sl){if(reduce)return;sl.querySelectorAll('.k span,.dato span,.grande span,.tabla-k .vv,.e .nn,.cifra-portada span').forEach(el=>{
- if(!el.dataset.orig)el.dataset.orig=el.textContent;const t=el.dataset.orig;if(/ a | de |\//.test(t))return;
+ if('fijo' in el.dataset)return;if(!el.dataset.orig)el.dataset.orig=el.textContent;const t=el.dataset.orig;if(/ a | de |\//.test(t))return;
  const m=t.match(/[+−-]?[\d.]+(,\d+)?/);if(!m)return;const raw=m[0];const dec=(raw.split(',')[1]||'').length;
  const val=parseFloat(raw.replace(/\./g,'').replace(',','.').replace('−','-'));if(isNaN(val))return;const miles=/\d\.\d{3}/.test(raw);
  const ini=performance.now(),dur=1100;cancelAnimationFrame(el._raf);
