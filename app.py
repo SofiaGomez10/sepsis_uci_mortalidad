@@ -193,7 +193,6 @@ with t_des:
     figuras = [("03_roc_modelo_vs_sofa", "Curva ROC. El modelo queda por encima del SOFA y ambos, cerca de la diagonal del azar: la discriminación es modesta."),
                ("05_calibracion", "Calibración. Tras el ajuste, los deciles de riesgo quedan alrededor de la diagonal: el porcentaje predicho corresponde a la mortalidad observada."),
                ("06_estratos_riesgo", "Estratos. La mortalidad observada aumenta de un estrato al siguiente."),
-               ("09_curva_decision", "Curva de decisión. Usar el modelo aporta más beneficio neto que intensificar a todos o a ninguno en el rango central de umbrales."),
                ("07_distribucion_riesgos", "Distribución de riesgos. El modelo solo asigna valores en un rango estrecho; el grupo de la derecha son, sobre todo, pacientes con choque séptico."),
                ("02_odds_ratios", "Odds ratios. El choque séptico es el factor con mayor peso; las demás variables aportan poco individualmente.")]
     for i in range(0, len(figuras), 2):
